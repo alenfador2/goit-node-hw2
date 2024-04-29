@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const contacts = require('../../models/contacts.js');
-const { addNewContact, changeContact } = require('../../joi/contact.js');
 
 router.get('/', async (req, res, next) => {
-  const allContacts = await contacts.listContacts();
-  await res.json({
+  const allContacts = await contacts.getAll();
+  res.json({
     status: 'success',
     code: 200,
     data: { allContacts },
@@ -14,7 +13,7 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:contactId', async (req, res, next) => {
   const { contactId } = req.params;
-  const contact = await contacts.getContactById(contactId);
+  const contact = await contacts.findById(contactId);
   if (!contact) {
     res.json({
       status: 'rejected',
@@ -33,17 +32,7 @@ router.get('/:contactId', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const { name, email, phone } = req.body;
-    const validation = addNewContact.validate({ name, email, phone });
-    if (validation.error) {
-      res.json({
-        status: 'rejected',
-        code: 400,
-        message: `validation error: ${validation.error.message}`,
-      });
-    } else {
-      console.log('Data is valid!');
-    }
-    const newContact = await contacts.addContact(name, email, phone);
+    const newContact = await contacts.create(name, email, phone);
     if (!name || !email || !phone) {
       res.json({
         status: 'failed',
@@ -65,7 +54,7 @@ router.post('/', async (req, res, next) => {
 
 router.delete('/:contactId', async (req, res, next) => {
   const { contactId } = req.params;
-  const deleteContact = await contacts.removeContact(contactId);
+  const deleteContact = await contacts.deleteOne(contactId);
   if (!deleteContact) {
     res.json({
       status: 'rejected',
@@ -84,7 +73,10 @@ router.delete('/:contactId', async (req, res, next) => {
 router.put('/:contactId', async (req, res, next) => {
   const { contactId } = req.params;
   const body = req.body;
-  const updateCurrentContact = await contacts.updateContact(contactId, body);
+  const updateCurrentContact = await contacts.findByIdAndUpdate(
+    contactId,
+    body
+  );
   if (Object.keys(req.body).length === 0) {
     res.json({
       status: 'rejected',
@@ -92,16 +84,7 @@ router.put('/:contactId', async (req, res, next) => {
       message: 'missing fields',
     });
   }
-  const validation = changeContact.validate({ ...body });
-  if (validation.error) {
-    res.json({
-      status: 'rejected',
-      code: 400,
-      message: `Validation Error: ${validation.error.message}`,
-    });
-  } else {
-    console.log('Data is valid');
-  }
+
   if (!updateCurrentContact) {
     res.json({
       status: 'failed',
