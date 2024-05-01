@@ -22,6 +22,6 @@ contactSchema.statics.getAll = function () {
   return Contact.find().lean();
 };
 
-const Contact = mongoose.model('db_contacts', contactSchema, 'contacts');
+const Contact = mongoose.model(`Contact`, contactSchema, 'contacts');
 
 module.exports = Contact;
