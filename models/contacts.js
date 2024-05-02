@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const contactSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,6 +14,10 @@ const contactSchema = new mongoose.Schema({
   favorite: {
     type: Boolean,
     default: false,
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
   },
 });
 
