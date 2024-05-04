@@ -83,18 +83,18 @@ router.post('/login', async (req, res, next) => {
 });
 
 router.get('/logout', verifyToken, async (req, res, next) => {
-  const { _id } = req.user;
-  console.log(req.user);
+  const userId = req.user._id;
   try {
-    const user = await User.findById(_id);
+    const user = await User.findOne(userId);
+
     if (!user) {
-      res.json({
+      return res.json({
         status: 'failed',
         code: 401,
         message: 'Not authorized',
       });
     }
-    req.user.token = null;
+    user.token = null;
     await req.user.save();
     res.json(204).end();
   } catch (error) {

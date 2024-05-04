@@ -4,7 +4,7 @@ const User = require('../models/users');
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
-    res.json({
+    return res.json({
       status: 'failed',
       code: 401,
       message: 'Not authorized',
