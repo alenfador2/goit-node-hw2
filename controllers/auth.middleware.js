@@ -4,7 +4,7 @@ const User = require('../models/users');
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
-    return res.json({
+    return res.status(401).json({
       status: 'failed',
       code: 401,
       message: 'Not authorized',
@@ -14,7 +14,7 @@ const verifyToken = async (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.SECRET);
     const user = User.findById(decodedToken.userId);
     if (!user || user.token !== token) {
-      return res.json({
+      return res.status(401).json({
         status: 'failed',
         code: 401,
         message: 'Not authorized',
@@ -23,7 +23,8 @@ const verifyToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    return res.json({
+    console.log(error);
+    return res.status(401).json({
       status: 'failed',
       code: 401,
       message: 'Not authorized',

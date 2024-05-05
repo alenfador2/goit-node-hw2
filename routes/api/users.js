@@ -10,7 +10,7 @@ router.post('/signup', async (req, res, next) => {
     const { email, password } = req.body;
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.json({
+      return res.status(409).json({
         status: 'failed',
         code: 409,
         message: 'Email in use!',
@@ -25,14 +25,14 @@ router.post('/signup', async (req, res, next) => {
 
     await newUser.save();
 
-    res.json({
+    return res.status(201).json({
       status: 'success',
       code: 201,
       message: 'User created succesfully!',
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    return res.status(400).json({
       status: 'error',
       code: 400,
       message: 'Błąd z Joi lub innej biblioteki aplikacji',
@@ -45,7 +45,7 @@ router.post('/login', async (req, res, next) => {
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      res.json({
+      return res.status(401).json({
         status: 'failed',
         code: 401,
         message: 'Email or password is wrong!',
@@ -54,22 +54,26 @@ router.post('/login', async (req, res, next) => {
 
     const passwordMatch = await bcrypt.compare(password, existingUser.password);
     if (!passwordMatch) {
-      res.json({
+      return res.status(401).json({
         status: 'failed',
         code: 401,
         message: 'Email or password is wrong!',
       });
     }
 
-    const token = jwt.sign({ userId: existingUser._id }, process.env.SECRET, {
-      expiresIn: '6h',
-    });
+    const token = await jwt.sign(
+      { userId: existingUser._id },
+      process.env.SECRET,
+      {
+        expiresIn: '6h',
+      }
+    );
 
     existingUser.token = token;
 
     await existingUser.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       token,
       user: {
         email: existingUser.email,
@@ -84,19 +88,26 @@ router.post('/login', async (req, res, next) => {
 
 router.get('/logout', verifyToken, async (req, res, next) => {
   const userId = req.user._id;
+  await console.log(req.user);
   try {
     const user = await User.findOne(userId);
 
     if (!user) {
-      return res.json({
+      return res.status(401).json({
         status: 'failed',
         code: 401,
         message: 'Not authorized',
       });
     }
     user.token = null;
-    await req.user.save();
-    res.json(204).end();
+    await user.save();
+    return res
+      .status(204)
+      .json({
+        code: 204,
+        message: 'User logout',
+      })
+      .end();
   } catch (error) {
     next(error);
   }
