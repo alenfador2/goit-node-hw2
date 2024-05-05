@@ -4,6 +4,9 @@ const User = require('../../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const verifyToken = require('../../controllers/auth.middleware');
+const gravatar = require('gravatar');
+const multer = require('multer');
+const imageUpload = require('../../controllers/upload');
 
 router.post('/signup', async (req, res, next) => {
   try {
@@ -16,8 +19,13 @@ router.post('/signup', async (req, res, next) => {
         message: 'Email in use!',
       });
     }
+    const avatarURL = await gravatar.url(email, {
+      s: 250,
+      d: 'identicon',
+      r: 'pg',
+    });
 
-    const newUser = await new User({ email, password });
+    const newUser = await new User({ email, password, avatarURL });
 
     const salt = await bcrypt.genSalt(10);
 
@@ -112,4 +120,13 @@ router.get('/current', verifyToken, async (req, res, next) => {
     next(error);
   }
 });
+
+const upload = multer({ dest: 'tmp/' });
+router.patch(
+  '/avatars',
+  verifyToken,
+  upload.single('avatar'),
+  imageUpload.uploadAvatar
+);
+
 module.exports = router;
