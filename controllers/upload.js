@@ -21,7 +21,7 @@ const uploadAvatar = async (req, res, next) => {
       req.file.originalname
     )}`;
     await image.writeAsync(
-      path.join(__dirname, '..', '..', 'public', 'avatar', 'filename')
+      path.join(__dirname, '..', '..', 'public', 'avatar', filename)
     );
     user.avatarUrl = `/avatars/${filename}`;
     await user.save();
