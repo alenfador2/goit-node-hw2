@@ -1,6 +1,5 @@
-const multer = require('multer');
 const jimp = require('jimp');
-const gravatar = require('gravatar');
+
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
