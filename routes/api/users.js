@@ -7,6 +7,7 @@ const verifyToken = require('../../controllers/auth.middleware');
 const gravatar = require('gravatar');
 const multer = require('multer');
 const imageUpload = require('../../controllers/upload');
+const userController = require('../../controllers/user.controller');
 
 router.post('/signup', async (req, res, next) => {
   try {
@@ -127,6 +128,12 @@ router.patch(
   verifyToken,
   upload.single('avatar'),
   imageUpload.uploadAvatar
+);
+
+router.get(
+  '/verify/:verificationToken',
+  verifyToken,
+  userController.verifyUser
 );
 
 module.exports = router;

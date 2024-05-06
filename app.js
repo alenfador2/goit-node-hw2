@@ -2,7 +2,7 @@ const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config({ path: './.env' });
+require('dotenv').config({ path: './config.env' });
 
 const contactsRouter = require('./routes/api/contacts');
 const usersRouter = require('./routes/api/users');
